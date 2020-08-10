@@ -179,8 +179,8 @@ def to_json(output_path, *layers):
 
                 lines += """
           var layer_%s = {
-            "layer_type": "fc", 
-            "sy": 1, "sx": 1, 
+            "layer_type": "fc",
+            "sy": 1, "sx": 1,
             "out_sx": 1, "out_sy": 1,
             "stride": 1, "pad": 0,
             "out_depth": %s, "in_depth": %s,
@@ -197,7 +197,7 @@ def to_json(output_path, *layers):
 
                 lines += """
           var layer_%s = {
-            "layer_type": "deconv", 
+            "layer_type": "deconv",
             "sy": 5, "sx": 5,
             "out_sx": %s, "out_sy": %s,
             "stride": 2, "pad": 1,
@@ -353,7 +353,7 @@ def generate_data(sess, model, config, option):
             print(" [*] %d" % idx)
             z_sample = np.random.uniform(-1, 1, size=(config.batch_size, model.z_dim))
 
-            zero_labeles = model.zero_one_ratio
+            zero_labeles = 0.5 # model.zero_one_ratio
 
             # if config.dataset == "LACity":
             #   zero_labeles= 0.48       # Based the ratio of labels in initial dataset
@@ -377,7 +377,7 @@ def generate_data(sess, model, config, option):
             print("y shape " + str(y.shape))
             y = y.astype('int16')
 
-            y_one_hot = np.zeros((config.batch_size, model.y_dim))
+            y_one_hot = np.zeros((config.batch_size, 2))
 
             # y indicates the index of ones in y_one_hot : in this case y_dim =2 so indexe are 0 or 1
             y_one_hot[np.arange(config.batch_size), y] = 1
@@ -402,7 +402,7 @@ def generate_data(sess, model, config, option):
         origin_data_path = model.train_data_path  # './data/'+ config.dataset+ '/train_'+ config.dataset + '_cleaned'
 
         if os.path.exists(origin_data_path + ".csv"):
-            origin_data = pd.read_csv(origin_data_path + ".csv", sep=';')
+            origin_data = pd.read_csv(origin_data_path + ".csv", sep=',')
 
         elif os.path.exists(origin_data_path + ".pickle"):
             with open(origin_data_path + '.pickle', 'rb') as handle:
@@ -422,14 +422,14 @@ def generate_data(sess, model, config, option):
         # Rounding Data
         round_columns = range(scaled_fake.shape[1])
 
-        round_scaled_fake = rounding(scaled_fake, origin_data.as_matrix(), round_columns)
+        round_scaled_fake = rounding(scaled_fake, origin_data.values, round_columns)
 
         # Required for Classification NN evaluation only
         # save_data(round_scaled_fake , save_dir +'/' + config.test_id + "_scaled_fake_tabular.pickle" )
 
         rsf_out = pd.DataFrame(round_scaled_fake)
 
-        rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake.csv' , index=False, sep=';')
+        rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake.csv' , index=False, sep=',')
 
         print("Generated Data shape = " + str(round_scaled_fake.shape))
 

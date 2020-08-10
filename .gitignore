@@ -10,3 +10,6 @@ checkpoint/
 samples/
 
 logs/
+.DS_Store
+*.pyc
+.env/

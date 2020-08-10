@@ -60,7 +60,7 @@ class TableGan(object):
         self.feature_size = 0
         self.attrib_num = 1
 
-        self.y_dim = y_dim
+        self.y_dim = None  # y_dim
         self.z_dim = z_dim
 
         self.gf_dim = gf_dim
@@ -83,7 +83,6 @@ class TableGan(object):
         self.g_bn0 = batch_norm(name='g_bn0')
         self.g_bn1 = batch_norm(name='g_bn1')
         self.g_bn2 = batch_norm(name='g_bn2')
-
         self.g_bn3 = batch_norm(name='g_bn3')
 
         self.alpha = alpha  # Info Loss Weigh
@@ -113,11 +112,9 @@ class TableGan(object):
 
     def build_model(self):
 
-        self.y = tf.placeholder(
-            tf.float32, [self.batch_size, self.y_dim], name='y')
+        self.y = tf.placeholder(tf.float32, [self.batch_size, self.y_dim], name='y')
 
-        self.y_normal = tf.placeholder(
-            tf.int16, [self.batch_size, 1], name='y_normal')
+        self.y_normal = tf.placeholder(tf.int16, [self.batch_size, 1], name='y_normal')
 
         # if self.crop:
         #     image_dims = [self.output_height, self.output_width, self.c_dim]
@@ -125,16 +122,13 @@ class TableGan(object):
         #     image_dims = [self.input_height, self.input_width, self.c_dim]
 
         data_dims = [self.input_height, self.input_width, self.c_dim]
-        self.inputs = tf.placeholder(
-            tf.float32, [self.batch_size] + data_dims, name='inputs')
+        self.inputs = tf.placeholder(tf.float32, [self.batch_size] + data_dims, name='inputs')
 
-        self.sample_inputs = tf.placeholder(
-            tf.float32, [self.sample_num] + data_dims, name='sample_inputs')
+        self.sample_inputs = tf.placeholder(tf.float32, [self.sample_num] + data_dims, name='sample_inputs')
 
         inputs = self.inputs
 
-        self.z = tf.placeholder(
-            tf.float32, [None, self.z_dim], name='z')
+        self.z = tf.placeholder(tf.float32, [None, self.z_dim], name='z')
 
         self.z_sum = histogram_summary("z", self.z)
 
@@ -159,7 +153,6 @@ class TableGan(object):
                 self.GC = masking(self.G, self.label_col, self.attrib_num)
 
             self.C_, self.C_logits_, self.C_features = self.classification(self.GC, self.y, reuse=True)
-
         else:
             self.G = self.generator(self.z)
             self.D, self.D_logits, self.D_features = self.discriminator(inputs)
@@ -274,7 +267,7 @@ class TableGan(object):
 
         self.saver = tf.train.Saver()
 
-    def train(self, config, experiment):
+    def train(self, config):
         print("Start Training...\n")
 
         d_optim = tf.train.AdamOptimizer(config.learning_rate, beta1=config.beta1) \
@@ -293,11 +286,9 @@ class TableGan(object):
         except:
             tf.initialize_all_variables().run()
 
-        self.g_sum = merge_summary([self.z_sum, self.d__sum,
-                                    self.G_sum, self.g_loss_sum])
+        self.g_sum = merge_summary([self.z_sum, self.d__sum, self.G_sum, self.g_loss_sum])
 
-        self.d_sum = merge_summary(
-            [self.z_sum, self.d_sum, self.d_loss_sum])
+        self.d_sum = merge_summary([self.z_sum, self.d_sum, self.d_loss_sum])
 
         # Classifier
         if self.y_dim:
@@ -337,7 +328,7 @@ class TableGan(object):
         gvar = np.zeros((1, feature_size), dtype=np.float32)
         gvar_ = np.zeros((1, feature_size), dtype=np.float32)
 
-        for epoch in xrange(config.epoch):
+        for epoch in range(config.epoch):
 
             batch_idxs = min(len(self.data_X),
                              config.train_size) // config.batch_size  # train_size= np.inf
@@ -514,10 +505,10 @@ class TableGan(object):
                     })
 
                 counter += 1
-                experiment.log_metric("d_loss", errD_fake + errD_real, step=idx)
-                experiment.log_metric("g_loss", errG, step=idx)
+                # experiment.log_metric("d_loss", errD_fake + errD_real, step=idx)
+                # experiment.log_metric("g_loss", errG, step=idx)
                 if self.y_dim:
-                    experiment.log_metric("c_loss", errC, step=idx)
+                    # experiment.log_metric("c_loss", errC, step=idx)
                     print("Dataset: [%s] -> [%s] -> Epoch: [%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f, "
                           "c_loss: %.8f" % (config.dataset, config.test_id, epoch, idx, batch_idxs,
                                             time.time() - start_time, errD_fake + errD_real, errG, errC))
@@ -816,7 +807,7 @@ class TableGan(object):
 
         if os.path.exists(self.train_data_path + ".csv"):
 
-            X = pd.read_csv(self.train_data_path + ".csv", sep=';')
+            X = pd.read_csv(self.train_data_path + ".csv", sep=',')
             print("Loading CSV input file : %s" % (self.train_data_path + ".csv"))
 
             self.attrib_num = X.shape[1]
