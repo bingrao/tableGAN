@@ -9,7 +9,6 @@ import math
 import pprint
 import scipy.misc
 import numpy as np
-from time import gmtime, strftime
 from six.moves import xrange
 
 import tensorflow as tf
@@ -27,7 +26,7 @@ pp = pprint.PrettyPrinter()
 
 get_stddev = lambda x, k_h, k_w: 1 / math.sqrt(k_w * k_h * x.get_shape()[-1])
 
-DATASETS = ('LACity', 'Health', 'Adult', 'Ticket')
+DATASETS = ('LACity', 'Health', 'Adult', 'Ticket', 'Civilian', 'Employee')
 
 
 def padding_duplicating(data, row_size):
@@ -120,8 +119,7 @@ def imsave(images, size, path):
     return scipy.misc.imsave(path, image)
 
 
-def center_crop(x, crop_h, crop_w,
-                resize_h=64, resize_w=64):
+def center_crop(x, crop_h, crop_w, resize_h=64, resize_w=64):
     if crop_w is None:
         crop_w = crop_h
     h, w = x.shape[:2]
@@ -429,14 +427,13 @@ def generate_data(sess, model, config, option):
 
         rsf_out = pd.DataFrame(round_scaled_fake)
 
-        rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake.csv', index=False, sep=',')
-
         subs_path = f'{config.project_dir}/data/{config.dataset}/subs.pkl'
         if os.path.exists(subs_path):
             import pickle
             subs = pickle.load(open(subs_path, "rb"))
             columns_name = subs['table_colums_name']['label']
             rsf_out.columns = columns_name
+            rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake.csv', index=False, sep=',')
             subs.pop('table_colums_name')
 
             for attr in subs.keys():
@@ -445,6 +442,7 @@ def generate_data(sess, model, config, option):
             rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake_with_label.csv', index=False, sep=',')
         else:
             print(f"There is not subs file for recover original data: {subs_path}")
+            rsf_out.to_csv(f'{save_dir}/{config.dataset}_{config.test_id}_fake.csv', index=False, sep=',')
 
         print("Generated Data shape = " + str(round_scaled_fake.shape))
 

@@ -6,10 +6,10 @@ def config_opts(parser):
     parser.add_argument('-config', '--config', required=False, help='Config file path')
     parser.add_argument('-project_log', '--project_log', type=str, default='')
     parser.add_argument('-debug', '--debug', type=bool, default=False)
+    parser.add_argument('-data', '--data', type=str, required=False, default='Civilian')
 
 
 def data_opts(parser):
-    parser.add_argument('-data', '--data', type=str, required=True)
     parser.add_argument('-suffix', '--suffix', type=str, default='_textual')
     parser.add_argument('-sep', '--sep', type=str, default=',')
     parser.add_argument('-ext', '--ext', type=str, default='csv')
@@ -17,7 +17,7 @@ def data_opts(parser):
     parser.add_argument('-cat_names', '--cat_names', type=list, default='')
     parser.add_argument('-to_disk', '--to_disk', type=bool, default=True)
     #
-    parser.add_argument('-target', '--target', type=str, default='suicide',
+    parser.add_argument('-target', '--target', type=str, default=None,
                         help='Ticket <--> OpCarrierGroup; Civilian <--> suicide')
     parser.add_argument('-d_basepath', '--d_basepath', type=str, default='data')
 

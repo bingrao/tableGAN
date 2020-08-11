@@ -75,6 +75,7 @@ def get_duplicates(real_data, synthetic_data):
     duplicates = df[df._merge == 'both']
     return len(duplicates), duplicates
 
+
 def plot_dim_red(df, how='PCA', cont_names=None, cat_names=None):
     from sklearn.decomposition import PCA
     import seaborn as sns
@@ -87,6 +88,7 @@ def plot_dim_red(df, how='PCA', cont_names=None, cat_names=None):
     x = pca.fit_transform(df[cont_names])
     fig, ax = plt.subplots(figsize=(6, 6))
     sns.scatterplot(ax=ax, x=x[:, 0], y=x[:, 1])
+
 
 def plot_stats(real_dict, fakes):
     if not isinstance(fakes, list):

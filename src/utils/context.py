@@ -53,6 +53,7 @@ class Context:
                 pass
         else:
             pass
+
         self.data = self.config["data"]
 
         init_rng(seed=0)
